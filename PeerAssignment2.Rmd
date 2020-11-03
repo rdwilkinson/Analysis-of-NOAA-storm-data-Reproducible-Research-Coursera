@@ -11,22 +11,52 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Synopsis
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Data processing
+## Pre-processing
+Check if the dataset is already available in the adequate folder, otherwise create this and download it.
+```{r}
+if (!dir.exists(file.path("data"))) {
+  dir.create(file.path("data"))
+} 
 
-```{r cars}
-summary(cars)
+if (!file.exists("data/StormData.csv.bz2")) {
+  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", "data/StormData.csv.bz2")
+}
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+Load the data into the environment.
+```{r}
+stormData <- read.csv("data/StormData.csv.bz2", header = TRUE, sep = ",")
+head(stormData)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Get an idea of how the dataset is structured.
+```{r}
+names(stormData)
+head(stormData)
+```
+Keep the variables of interest for the analysis and make sure they are of the correct type.
+```{r}
+newStormData <- stormData[, c("REFNUM", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP",  "EVTYPE")]
+
+for (i in 1:dim(newStormData)[2]) {
+  str(newStormData[i])
+}
+
+stormData$EVTYPE <- as.factor(stormData$EVTYPE)
+```
+
+There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). However, this is not performed here. It is assumed that there will be more consistency in the naming of the most frequent and catastrophic event types.
+
+## Analysis
+
+```{r}
+
+```
+
+
+
+# Results
