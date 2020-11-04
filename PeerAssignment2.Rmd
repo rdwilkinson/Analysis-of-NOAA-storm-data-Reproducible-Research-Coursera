@@ -195,6 +195,23 @@ newStormData$propDmgEst <- newStormData$PROPDMG * newStormData$PROPDMGEXP.num
 summary(newStormData$propDmgEst)
 ```
 
+### How has crop and property damage evolved over time?
+```{r}
+averages <- newStormData %>%
+  group_by(newYear) %>%
+  summarise_at(c("propDmgEst", "cropDmgEst"), mean, na.rm = TRUE) %>%
+  gather(key = "variable", value = "value", -newYear)
+
+averages$newDate <- paste(averages$newYear, "1", "1", sep = "/")
+averages$newDate <- as.Date(averages$newDate)
+
+library(ggplot2)
+ggplot(data = averages, aes(x = newDate, y = value, group = variable)) +
+  geom_line(aes(color = variable))
+  
+
+```
+Here, it becomes apparent that there are no crop-damage estimates before 1993.
 
 
 ... and recode the values as numeric multipliers.
