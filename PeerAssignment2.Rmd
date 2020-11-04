@@ -40,7 +40,7 @@ head(stormData)
 ```
 Keep the variables of interest for the analysis and make sure they are of the correct type (switch the event type variable to a factor).
 ```{r}
-newStormData <- stormData[, c("REFNUM", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP",  "EVTYPE", "BGN_DATE")]
+newStormData <- stormData[, c("REFNUM", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP",  "EVTYPE", "BGN_DATE", "REMARKS")]
 
 for (i in 1:dim(newStormData)[2]) {
   str(newStormData[i])
@@ -91,16 +91,50 @@ summary(newStormData$FATALITIES)
 ```
 
 ### Preparing the damage estimates
-Damage is measured bidimensionally in the dataset, through an estimate of the cost of damage to property, as well as of the cost of damage to crops. Both estimates, as printed in the NOAA reports, comprise a base estimate and a multiplier. However, apart from k = thousand, m = million and b = billion, the labels are unclear ("", "?", "0", "2").
+Damage is measured bidimensionally in the dataset, through an estimate of the cost of damage to property, as well as of the cost of damage to crops. Both estimates, as printed in the NOAA reports, comprise a base estimate and a multiplier. However, apart from h = hundred, k = thousand, m = million and b = billion, the labels are unclear ("", "?", "0", "+").
 ```{r}
 unique(newStormData$PROPDMGEXP)
 unique(newStormData$CROPDMGEXP)
 ```
 
-Let's make all the mutipliers uppercase
+Let's make all the mutipliers uppercase to collapse some of the categories.
 ```{r}
-
+newStormData$PROPDMGEXP <- toupper(newStormData$PROPDMGEXP)
+newStormData$CROPDMGEXP <- toupper(newStormData$CROPDMGEXP)
 ```
+
+Can the meaning of the numbered values be guessed qualitatively from the remarks? Let's compare some of these.
+```{r}
+m0 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "0" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m1 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "1" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m2 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "2" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m3 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "3" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m4 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "4" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m5 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "5" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m6 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "6" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m7 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "7" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+m8 <- head(newStormData$REMARKS[newStormData$PROPDMGEXP == "8" & newStormData$REMARKS != "" & newStormData$REMARKS != "  "], 2)
+
+listRemarks <- list(M0 = m0, M1 = m1, M2 = m2, M3 = m3, M4 = m4, 
+                    M5 = m5, M6 = m6, M7 = m7, M8 = m8)
+
+listRemarks
+
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == ""]
+```
+There does seem to be some level of gradation in these descriptions. Hence, it seems as though there are two competing measurement systems: the h, k, m, b system and a numeric scale ranging from 0 to 7.
+
+Which is the most frequently used?
+
+```{r}
+out <- newStormData %>%
+  group_by(PROPDMGEXP) %>%
+  summarise(totalEvents = sum(EVTYPE2))
+  
+```
+
+
+... and recode the values as numeric multipliers.
 
 
 ## Analysis
