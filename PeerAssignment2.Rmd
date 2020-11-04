@@ -232,22 +232,36 @@ highestInjuries <- newStormData %>%
   slice_max(INJURIES, n = 10) %>%
   mutate(Pos = dense_rank(desc(INJURIES)))
 
+names(highestInjuries)[2] <- "Num"
+highestInjuries$type <- "injuries"
+
 highestFatalities <- newStormData %>%
   group_by(EVTYPE2) %>%
   summarise_at("FATALITIES", sum, na.rm = TRUE) %>%
   slice_max(FATALITIES, n = 10) %>%
   mutate(Pos = dense_rank(desc(FATALITIES)))
 
+names(highestFatalities)[2] <- "Num"
+highestFatalities$type <- "fatalities"
+
 mergedRank <- data.frame(Rank = highestFatalities$Pos,
                          WorstEventsFatalities = highestFatalities$EVTYPE2,
-                         NumFatalities = highestFatalities$FATALITIES,
+                         NumFatalities = highestFatalities$Num,
                          WorstEventsInjured = highestInjuries$EVTYPE2,
-                         NumInjured = highestInjuries$INJURIES)
+                         NumInjured = highestInjuries$Num)
 
-
-
+mergedRank
 ```
 
+Let's look at this with a bar chart.
+```{r}
+mergedRank2 <- rbind(highestInjuries, highestFatalities)
+
+
+ggplot(data = mergedRank2, aes(x = factor(EVTYPE2), y = Num, fill = type)) +
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+```
 
 
 # Results
