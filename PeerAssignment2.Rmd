@@ -30,7 +30,6 @@ if (!file.exists("data/StormData.csv.bz2")) {
 Load the data into the environment.
 ```{r}
 stormData <- read.csv("data/StormData.csv.bz2", header = TRUE, sep = ",")
-head(stormData)
 ```
 
 Get an idea of how the dataset is structured.
@@ -125,7 +124,7 @@ There does seem to be some level of gradation in these descriptions. Hence, it s
 Which is the most frequently used?
 
 ```{r}
-newStormData$PROPDMGEXP[newStormData$PROPDMGEXP == ""] <- "empty"
+newStormData$PROPDMGEXP[newStormData$PROPDMGEXP == ""] <- "NULL"
 
 tallySystems <- newStormData %>%
   group_by(PROPDMGEXP) %>%
@@ -142,13 +141,15 @@ table(newStormData$numericDamage2)
 
 newStormData <- subset(newStormData, newStormData$numericDamage == FALSE)
 newStormData <- subset(newStormData, newStormData$numericDamage2 == FALSE)
+
+dim(newStormData)
 ```
 
 Let's also remove the records with "-", "+", and "?".
 ```{r}
-newStormData$numericDamage3 <- str_detect(newStormData$PROPDMGEXP, "[:punct:]")
+newStormData$numericDamage3 <- str_detect(newStormData$PROPDMGEXP, "\\W")
 table(newStormData$numericDamage3)
-newStormData$numericDamage4 <- str_detect(newStormData$CROPDMGEXP, "[:punct:]")
+newStormData$numericDamage4 <- str_detect(newStormData$CROPDMGEXP, "\\W")
 table(newStormData$numericDamage4)
 
 newStormData <- subset(newStormData, newStormData$numericDamage3 == FALSE)
@@ -165,6 +166,8 @@ tallySystems <- newStormData %>%
   
 tallySystems
 ```
+That's looking cleaner!
+
 
 
 ... and recode the values as numeric multipliers.
