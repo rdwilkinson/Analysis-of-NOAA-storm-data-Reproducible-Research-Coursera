@@ -119,19 +119,21 @@ listRemarks <- list(M0 = m0, M1 = m1, M2 = m2, M3 = m3, M4 = m4,
                     M5 = m5, M6 = m6, M7 = m7, M8 = m8)
 
 listRemarks
-
-newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == ""]
 ```
-There does seem to be some level of gradation in these descriptions. Hence, it seems as though there are two competing measurement systems: the h, k, m, b system and a numeric scale ranging from 0 to 7.
+There does seem to be some level of gradation in these descriptions. Hence, it seems as though there are two competing measurement systems: the h, k, m, b system and a numeric scale ranging from 0 to 8.
 
 Which is the most frequently used?
 
 ```{r}
-out <- newStormData %>%
+newStormData$PROPDMGEXP[newStormData$PROPDMGEXP == ""] <- "empty"
+
+tallySystems <- newStormData %>%
   group_by(PROPDMGEXP) %>%
-  summarise(totalEvents = sum(EVTYPE2))
+  tally()
   
+tallySystems
 ```
+It seems the letter system was used more frequently than the numeric scale. Let's remove the records numeric damage multipliers.
 
 
 ... and recode the values as numeric multipliers.
