@@ -224,7 +224,6 @@ The two research questions:
 2. Which events have the greatest economic consequences
 
 Let's begin with the first, by looking at the total number of injured and fatalities by event type.
-
 ```{r}
 highestInjuries <- newStormData %>%
   group_by(EVTYPE2) %>%
@@ -243,7 +242,9 @@ highestFatalities <- newStormData %>%
 
 names(highestFatalities)[2] <- "Num"
 highestFatalities$type <- "fatalities"
-
+```
+Hence, the worst event types would be the following:
+```{r}
 mergedRank <- data.frame(Rank = highestFatalities$Pos,
                          WorstEventsFatalities = highestFatalities$EVTYPE2,
                          NumFatalities = highestFatalities$Num,
@@ -253,7 +254,7 @@ mergedRank <- data.frame(Rank = highestFatalities$Pos,
 mergedRank
 ```
 
-Let's look at this with a bar chart.
+Let's look at this graphically with a bar chart.
 ```{r}
 mergedRank2 <- rbind(highestInjuries, highestFatalities)
 
