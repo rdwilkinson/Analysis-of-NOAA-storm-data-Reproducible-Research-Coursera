@@ -38,9 +38,9 @@ Get an idea of how the dataset is structured.
 names(stormData)
 head(stormData)
 ```
-Keep the variables of interest for the analysis and make sure they are of the correct type.
+Keep the variables of interest for the analysis and make sure they are of the correct type (switch the event type variable to a factor).
 ```{r}
-newStormData <- stormData[, c("REFNUM", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP",  "EVTYPE")]
+newStormData <- stormData[, c("REFNUM", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP",  "EVTYPE", "BGN_DATE")]
 
 for (i in 1:dim(newStormData)[2]) {
   str(newStormData[i])
@@ -49,7 +49,35 @@ for (i in 1:dim(newStormData)[2]) {
 stormData$EVTYPE <- as.factor(stormData$EVTYPE)
 ```
 
-There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). However, this is not performed here. It is assumed that there will be more consistency in the naming of the most frequent and catastrophic event types.
+### Do we have event types for every year in the dataset?
+The date is not in a format that is recognisable by R. Let's strip the year from the BGN_DATE variable.
+
+```{r}
+head(newStormData)
+
+library(tidyverse)
+
+newStormData$newDate <- str_split_fixed(newStormData$BGN_DATE, " ", 2)[, 1]
+newStormData$newYear <- str_split_fixed(newStormData$newDate, "/", 3)[, 3]
+
+missingEventTypes <- newStormData %>%
+  group_by(newYear) %>%
+  summarise(SumEventTypes = sum(is.na(EVTYPE)))
+
+head(missingEventTypes)
+```
+There are no years with missing event types.
+
+### What level of consistency was achieved in the categorisation of the events?
+```{r}
+head(unique(newStormData$EVTYPE))
+```
+
+There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). It is assumed that more catastrophic events will have been coded more consistently, so event categories are not collapsed here. Nevertheless, event types labelled as "summaries" are removed from the dataset.
+```{r}
+
+```
+
 
 ## Analysis
 
