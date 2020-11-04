@@ -133,7 +133,38 @@ tallySystems <- newStormData %>%
   
 tallySystems
 ```
-It seems the letter system was used more frequently than the numeric scale. Let's remove the records numeric damage multipliers.
+It seems the letter system was used more frequently than the numeric scale (at least for the property damage). Let's remove the records with numeric damage multipliers.
+```{r}
+newStormData$numericDamage <- str_detect(newStormData$PROPDMGEXP, "[:digit:]")
+table(newStormData$numericDamage)
+newStormData$numericDamage2 <- str_detect(newStormData$CROPDMGEXP, "[:digit:]")
+table(newStormData$numericDamage2)
+
+newStormData <- subset(newStormData, newStormData$numericDamage == FALSE)
+newStormData <- subset(newStormData, newStormData$numericDamage2 == FALSE)
+```
+
+Let's also remove the records with "-", "+", and "?".
+```{r}
+newStormData$numericDamage3 <- str_detect(newStormData$PROPDMGEXP, "[:punct:]")
+table(newStormData$numericDamage3)
+newStormData$numericDamage4 <- str_detect(newStormData$CROPDMGEXP, "[:punct:]")
+table(newStormData$numericDamage4)
+
+newStormData <- subset(newStormData, newStormData$numericDamage3 == FALSE)
+newStormData <- subset(newStormData, newStormData$numericDamage4 == FALSE)
+
+dim(newStormData)
+```
+
+Let's tally the records by multiplier again.
+```{r}
+tallySystems <- newStormData %>%
+  group_by(PROPDMGEXP) %>%
+  tally()
+  
+tallySystems
+```
 
 
 ... and recode the values as numeric multipliers.
