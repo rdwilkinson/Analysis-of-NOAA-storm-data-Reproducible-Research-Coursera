@@ -125,6 +125,7 @@ Which is the most frequently used?
 
 ```{r}
 newStormData$PROPDMGEXP[newStormData$PROPDMGEXP == ""] <- "NULL"
+newStormData$CROPDMGEXP[newStormData$CROPDMGEXP == ""] <- "NULL"
 
 tallySystems <- newStormData %>%
   group_by(PROPDMGEXP) %>%
@@ -165,8 +166,34 @@ tallySystems <- newStormData %>%
   tally()
   
 tallySystems
+
+tallySystems2 <- newStormData %>%
+  group_by(CROPDMGEXP) %>%
+  tally()
+  
+tallySystems2
 ```
 That's looking cleaner!
+Now, let's calculate the damage estimate with these.
+```{r}
+newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "B"] <- 1000000000 # Billion
+newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "M"] <- 1000000 # Million
+newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "K"] <- 1000 # Thousand
+newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "H"] <- 100 # Hundred
+newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "NULL"] <- 1 # 1
+
+newStormData$cropDmgEst <- newStormData$CROPDMG * newStormData$CROPDMGEXP.num
+summary(newStormData$cropDmgEst)
+
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == "B"] <- 1000000000 # Billion
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == "M"] <- 1000000 # Million
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == "K"] <- 1000 # Thousand
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == "H"] <- 100 # Hundred
+newStormData$PROPDMGEXP.num[newStormData$PROPDMGEXP == "NULL"] <- 1 # 1
+
+newStormData$propDmgEst <- newStormData$PROPDMG * newStormData$PROPDMGEXP.num
+summary(newStormData$propDmgEst)
+```
 
 
 
