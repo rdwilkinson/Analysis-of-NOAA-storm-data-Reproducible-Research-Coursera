@@ -73,7 +73,31 @@ There are no years with missing event types.
 head(unique(newStormData$EVTYPE))
 ```
 
-There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). It is assumed that more catastrophic events will have been coded more consistently, so event categories are not collapsed here. Nevertheless, event types labelled as "summaries" are removed from the dataset.
+There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). It is assumed that more catastrophic events will have been coded more consistently, so event categories are not collapsed here. Nevertheless, records with event types labelled as "summar*" are removed from the dataset.
+```{r}
+newStormData$EVTYPE <- toupper(newStormData$EVTYPE)
+
+newStormData$EVTYPE2 <- newStormData$EVTYPE
+newStormData$EVTYPE2[str_detect(newStormData$EVTYPE, "SUMMAR") == TRUE] <- NA
+sum(is.na(newStormData$EVTYPE2))
+
+newStormData[!is.na(newStormData$EVTYPE2),]
+```
+
+### Distribution of the estimates of injured and fatalities
+```{r}
+summary(newStormData$INJURIES)
+summary(newStormData$FATALITIES)
+```
+
+### Preparing the damage estimates
+Damage is measured bidimensionally in the dataset, through an estimate of the cost of damage to property, as well as of the cost of damage to crops. Both estimates, as printed in the NOAA reports, comprise a base estimate and a multiplier. However, apart from k = thousand, m = million and b = billion, the labels are unclear ("", "?", "0", "2").
+```{r}
+unique(newStormData$PROPDMGEXP)
+unique(newStormData$CROPDMGEXP)
+```
+
+Let's make all the mutipliers uppercase
 ```{r}
 
 ```
