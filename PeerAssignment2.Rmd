@@ -28,7 +28,7 @@ if (!file.exists("data/StormData.csv.bz2")) {
 ```
 
 Load the data into the environment.
-```{r}
+```{r, cache = TRUE}
 stormData <- read.csv("data/StormData.csv.bz2", header = TRUE, sep = ",")
 ```
 
@@ -70,6 +70,7 @@ There are no years with missing event types.
 ### What level of consistency was achieved in the categorisation of the events?
 ```{r}
 head(unique(newStormData$EVTYPE))
+length(unique(newStormData$EVTYPE))
 ```
 
 There are 985 different types of storm events. Some of these categories could be collapsed (e.g. "FLASH FLOOD LANDSLIDES" & "FLASH FLOOD/LANDSLIDE"). Others are not actually storm types (e.g. "Summary of March 14"). It is assumed that more catastrophic events will have been coded more consistently, so event categories are not collapsed here. Nevertheless, records with event types labelled as "summar*" are removed from the dataset.
@@ -80,7 +81,8 @@ newStormData$EVTYPE2 <- newStormData$EVTYPE
 newStormData$EVTYPE2[str_detect(newStormData$EVTYPE, "SUMMAR") == TRUE] <- NA
 sum(is.na(newStormData$EVTYPE2))
 
-newStormData[!is.na(newStormData$EVTYPE2),]
+newStormData <- newStormData[!is.na(newStormData$EVTYPE2),]
+head(newStormData)
 ```
 
 ### Distribution of the estimates of injured and fatalities
@@ -211,15 +213,38 @@ ggplot(data = averages, aes(x = newDate, y = value, group = variable)) +
   
 
 ```
-Here, it becomes apparent that there are no crop-damage estimates before 1993.
-
-
-... and recode the values as numeric multipliers.
-
+Here, it becomes apparent that there are no crop-damage estimates before 1993. This is a noteworthy limitation of the dataset.
 
 ## Analysis
 
+The two research questions:
+
+1. Which events are most harmful to population health
+
+2. Which events have the greatest economic consequences
+
+Let's begin with the first, by looking at the total number of injured and fatalities by event type.
+
 ```{r}
+highestInjuries <- newStormData %>%
+  group_by(EVTYPE2) %>%
+  summarise_at("INJURIES", sum, na.rm = TRUE) %>%
+  slice_max(INJURIES, n = 10) %>%
+  mutate(Pos = dense_rank(desc(INJURIES)))
+
+highestFatalities <- newStormData %>%
+  group_by(EVTYPE2) %>%
+  summarise_at("FATALITIES", sum, na.rm = TRUE) %>%
+  slice_max(FATALITIES, n = 10) %>%
+  mutate(Pos = dense_rank(desc(FATALITIES)))
+
+mergedRank <- data.frame(Rank = highestFatalities$Pos,
+                         WorstEventsFatalities = highestFatalities$EVTYPE2,
+                         NumFatalities = highestFatalities$FATALITIES,
+                         WorstEventsInjured = highestInjuries$EVTYPE2,
+                         NumInjured = highestInjuries$INJURIES)
+
+
 
 ```
 
