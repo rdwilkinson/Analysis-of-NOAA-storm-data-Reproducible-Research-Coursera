@@ -1,5 +1,4 @@
 ---
-title: "PeerAssignment2"
 author: "Richard D. Wilkinson"
 date: "03/11/2020"
 output: 
@@ -11,11 +10,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Synopsis
+# Analysis of NOAA storm event data
+
+## Synopsis
 
 
-# Data processing
-## Pre-processing
+## Data processing
+### Pre-processing
 Check if the dataset is already available in the adequate folder, otherwise create this and download it.
 ```{r}
 if (!dir.exists(file.path("data"))) {
@@ -48,7 +49,7 @@ for (i in 1:dim(newStormData)[2]) {
 stormData$EVTYPE <- as.factor(stormData$EVTYPE)
 ```
 
-### Do we have event types for every year in the dataset?
+#### Do we have event types for every year in the dataset?
 The date is not in a format that is recognisable by R. Let's strip the year from the BGN_DATE variable.
 
 ```{r}
@@ -67,7 +68,7 @@ head(missingEventTypes)
 ```
 There are no years with missing event types.
 
-### What level of consistency was achieved in the categorisation of the events?
+#### What level of consistency was achieved in the categorisation of the events?
 ```{r}
 head(unique(newStormData$EVTYPE))
 length(unique(newStormData$EVTYPE))
@@ -85,13 +86,13 @@ newStormData <- newStormData[!is.na(newStormData$EVTYPE2),]
 head(newStormData)
 ```
 
-### Distribution of the estimates of injured and fatalities
+#### Distribution of the estimates of injured and fatalities
 ```{r}
 summary(newStormData$INJURIES)
 summary(newStormData$FATALITIES)
 ```
 
-### Preparing the damage estimates
+#### Preparing the damage estimates
 Damage is measured bidimensionally in the dataset, through an estimate of the cost of damage to property, as well as of the cost of damage to crops. Both estimates, as printed in the NOAA reports, comprise a base estimate and a multiplier. However, apart from h = hundred, k = thousand, m = million and b = billion, the labels are unclear ("", "?", "0", "+").
 ```{r}
 unique(newStormData$PROPDMGEXP)
@@ -135,6 +136,7 @@ tallySystems <- newStormData %>%
   
 tallySystems
 ```
+
 It seems the letter system was used more frequently than the numeric scale (at least for the property damage). Let's remove the records with numeric damage multipliers.
 ```{r}
 newStormData$numericDamage <- str_detect(newStormData$PROPDMGEXP, "[:digit:]")
@@ -175,7 +177,9 @@ tallySystems2 <- newStormData %>%
   
 tallySystems2
 ```
+
 That's looking cleaner!
+
 Now, let's calculate the damage estimate with these.
 ```{r}
 newStormData$CROPDMGEXP.num[newStormData$CROPDMGEXP == "B"] <- 1000000000 # Billion
@@ -197,7 +201,9 @@ newStormData$propDmgEst <- newStormData$PROPDMG * newStormData$PROPDMGEXP.num
 summary(newStormData$propDmgEst)
 ```
 
-### How has crop and property damage evolved over time?
+#### How has crop and property damage evolved over time?
+
+The following figure is a multiple line chart of the average cost by year of damage to property and crops over the available time period.
 ```{r}
 averages <- newStormData %>%
   group_by(newYear) %>%
@@ -209,21 +215,22 @@ averages$newDate <- as.Date(averages$newDate)
 
 library(ggplot2)
 ggplot(data = averages, aes(x = newDate, y = value, group = variable)) +
-  geom_line(aes(color = variable))
+  geom_line(aes(color = variable)) + 
+  labs(title = "Multiple line chart of the mean crop and property damage estimates by year",
+       caption = "Data: NOAA Storm Database.",
+       x = "Year",
+       y = "Estimated cost",
+       fill = "Legend:") +
+  scale_color_discrete(name = "Legend:", labels = c("Crop damage", "Property damage"))
   
 
 ```
 Here, it becomes apparent that there are no crop-damage estimates before 1993. This is a noteworthy limitation of the dataset.
 
-## Analysis
+### Data analysis
+#### Q1: Which events are most harmful to population health?
 
-The two research questions:
-
-1. Which events are most harmful to population health
-
-2. Which events have the greatest economic consequences
-
-Let's begin with the first, by looking at the total number of injured and fatalities by event type.
+Let's calculate the total number of injured and fatalities by event type.
 ```{r}
 highestInjuries <- newStormData %>%
   group_by(EVTYPE2) %>%
@@ -243,7 +250,35 @@ highestFatalities <- newStormData %>%
 names(highestFatalities)[2] <- "Num"
 highestFatalities$type <- "fatalities"
 ```
-Hence, the worst event types would be the following:
+
+#### Q2: Which events have the greatest economic consequences?
+```{r}
+highestPropDmg <- newStormData %>%
+  group_by(EVTYPE2) %>%
+  summarise_at("propDmgEst", sum, na.rm = TRUE) %>%
+  slice_max(propDmgEst, n = 10) %>%
+  mutate(Pos = dense_rank(desc(propDmgEst)))
+
+names(highestPropDmg)[2] <- "Num"
+highestPropDmg$type <- "propDmg"
+
+highestCropDmg <- newStormData %>%
+  group_by(EVTYPE2) %>%
+  summarise_at("cropDmgEst", sum, na.rm = TRUE) %>%
+  slice_max(cropDmgEst, n = 10) %>%
+  mutate(Pos = dense_rank(desc(cropDmgEst)))
+
+names(highestCropDmg)[2] <- "Num"
+highestCropDmg$type <- "cropDmg"
+```
+
+
+
+
+## Results
+### Q1: Which events are most harmful to population health?
+
+The ten worst event types, in terms of both numbered of injured and fatalities, are the following:
 ```{r}
 mergedRank <- data.frame(Rank = highestFatalities$Pos,
                          WorstEventsFatalities = highestFatalities$EVTYPE2,
@@ -254,15 +289,44 @@ mergedRank <- data.frame(Rank = highestFatalities$Pos,
 mergedRank
 ```
 
-Let's look at this graphically with a bar chart.
+The following figure is a stacked bar chart of the estimated number of fatalities and people injured due to the ten most high-impact event types.
 ```{r}
 mergedRank2 <- rbind(highestInjuries, highestFatalities)
 
-
-ggplot(data = mergedRank2, aes(x = factor(EVTYPE2), y = Num, fill = type)) +
+ggplot(data = mergedRank2, aes(x = reorder(factor(EVTYPE2), -Num), y = Num, fill = type)) +
   geom_bar(stat = "identity") + 
-  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+  theme(axis.text.x = element_text(angle = 75, hjust = 1)) + 
+  labs(title = "Stacked bar chart of estimated health impacts by event type",
+       caption = "Data: NOAA Storm Database.",
+       x = "Event type",
+       y = "Estimated nb of injured/fatalities",
+       fill = "Legend:") +
+  scale_fill_discrete(name = "Legend:", labels = c("Injured", "Fatalities"))
 ```
 
+### Q2: Which events have the greatest economic consequences?
+On the other hand, the ten worst event types, in terms of property and crop damage, are the following:
+```{r}
+mergedRank3 <- data.frame(Rank = highestPropDmg$Pos,
+                         WorstEventsPropertyDmg = highestPropDmg$EVTYPE2,
+                         CostPropDmg = highestPropDmg$Num,
+                         WorstEventsCropDmg = highestCropDmg$EVTYPE2,
+                         CostCropDmg = highestCropDmg$Num)
 
-# Results
+mergedRank3
+```
+
+The following figure is a stacked bar chart of the estimated cost of the property and crop damage caused by the ten most high-impact event types.
+```{r}
+mergedRank4 <- rbind(highestPropDmg, highestCropDmg)
+
+ggplot(data = mergedRank4, aes(x = reorder(EVTYPE2, -Num), y = Num, fill = type)) +
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 75, hjust = 1)) + 
+  labs(title = "Stacked bar chart of estimated cost of damage by event type",
+       caption = "Data: NOAA Storm Database.",
+       x = "Event type",
+       y = "Estimated cost of damage") +
+  scale_fill_discrete(name = "Legend:", labels = c("Crop damage", "Property damage"))
+```
+
