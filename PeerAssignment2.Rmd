@@ -1,9 +1,7 @@
 ---
 author: "Richard D. Wilkinson"
 date: "03/11/2020"
-output: 
-  html_document: 
-    keep_md: yes
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Analysis of NOAA storm event data
+_Second assignment for the ['Reproducible Research'](https://www.coursera.org/learn/reproducible-research) Coursera course._
 
 ## Synopsis
 
@@ -87,6 +86,7 @@ sum(is.na(newStormData$EVTYPE2))
 newStormData <- newStormData[!is.na(newStormData$EVTYPE2),]
 head(newStormData)
 ```
+
 
 #### Distribution of the estimates of injured and fatalities
 ```{r}
