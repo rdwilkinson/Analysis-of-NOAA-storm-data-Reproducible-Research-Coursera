@@ -9,17 +9,11 @@ Coursera course.*
 
 ## Synopsis
 
-This report analyses data from the NOAA storm database in order to
-provide tentative answers to two questions: **(1)** which types of storm
-events are most harmful to population health and **(2)** which types of
-storm events have the greatest economic consequences? After noting some
-of the datasets’ limitations (e.g., crop damage estimates only from 1993
-onward, discrepances in damage estimates, incoherent storm types), this
-report shows on the one hand that “tornados”, “excessive heat” and “TSTM
-wind” were the worst storm types in terms of population health impacts.
-On the other hand, “floods”, “tornados” and “storm surges” were the
-three most catastrophic storm types in terms of estimated damage costs
-(property and crop damage).
+This report analyses data from the NOAA storm database in order to provide tentative answers to two questions: 
+1. Which types of storm events are most harmful to population health
+2. Which types of storm events have the greatest economic consequences?
+
+After noting some of the datasets’ limitations (e.g., crop damage estimates only from 1993 onward, discrepances in damage estimates, incoherent storm types), this report shows on the one hand that “tornados”, “excessive heat” and “TSTM wind” were the worst storm types in terms of population health impacts. On the other hand, “floods”, “tornados” and “storm surges” were the three most catastrophic storm types in terms of estimated damage costs (property and crop damage).
 
 ## Data processing
 
