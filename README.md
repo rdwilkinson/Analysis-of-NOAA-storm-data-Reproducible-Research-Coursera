@@ -197,19 +197,6 @@ head(missingEventTypes)
 
 There are no years with missing event types.
 
-This is how another student extracted the year. With this, they showed
-that there were far more records for more recent years (using a
-histgram).
-
-``` r
-# From other students' assignment
-# Recode the date as an interpretable date and retrieve the year
-newStormData$year2 <- as.numeric(format(as.Date(newStormData$BGN_DATE, format = "%m/%d/%Y %H:%M:%S"), "%Y"))
-hist(newStormData$year2, breaks = 30)
-```
-
-![](PeerAssignment2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
 #### What level of consistency was achieved in the categorisation of the events?
 
 ``` r
@@ -255,57 +242,13 @@ head(newStormData)
     ## 4      4          0        2     2.5          K       0            TORNADO
     ## 5      5          0        2     2.5          K       0            TORNADO
     ## 6      6          0        6     2.5          K       0            TORNADO
-    ##             BGN_DATE REMARKS    newDate newYear year2 EVTYPE2
-    ## 1  4/18/1950 0:00:00          4/18/1950    1950  1950 TORNADO
-    ## 2  4/18/1950 0:00:00          4/18/1950    1950  1950 TORNADO
-    ## 3  2/20/1951 0:00:00          2/20/1951    1951  1951 TORNADO
-    ## 4   6/8/1951 0:00:00           6/8/1951    1951  1951 TORNADO
-    ## 5 11/15/1951 0:00:00         11/15/1951    1951  1951 TORNADO
-    ## 6 11/15/1951 0:00:00         11/15/1951    1951  1951 TORNADO
-
-One student collapsed very similar categories by harmonising punctuation
-and spaces
-
-``` r
-# Other student's work
-
-# replace all punct. characters with a space
-event_types <- gsub("[[:blank:][:punct:]+]", " ", newStormData$EVTYPE)
-length(unique(event_types))
-```
-
-    ## [1] 807
-
-Another student cleverly collapsed categories by using the grep()
-function as follows:
-
-``` r
-# Other student's work
-
-# create a new variable EVENT to transform variable EVTYPE in groups
-newStormData$EVENT <- "OTHER"
-
-# group by keyword in EVTYPE
-newStormData$EVENT[grep("HAIL", newStormData$EVTYPE, ignore.case = TRUE)] <- "HAIL"
-newStormData$EVENT[grep("HEAT", newStormData$EVTYPE, ignore.case = TRUE)] <- "HEAT"
-newStormData$EVENT[grep("FLOOD", newStormData$EVTYPE, ignore.case = TRUE)] <- "FLOOD"
-newStormData$EVENT[grep("WIND", newStormData$EVTYPE, ignore.case = TRUE)] <- "WIND"
-newStormData$EVENT[grep("STORM", newStormData$EVTYPE, ignore.case = TRUE)] <- "STORM"
-newStormData$EVENT[grep("SNOW", newStormData$EVTYPE, ignore.case = TRUE)] <- "SNOW"
-newStormData$EVENT[grep("TORNADO", newStormData$EVTYPE, ignore.case = TRUE)] <- "TORNAD
-O"
-newStormData$EVENT[grep("WINTER", newStormData$EVTYPE, ignore.case = TRUE)] <- "WINTER"
-newStormData$EVENT[grep("RAIN", newStormData$EVTYPE, ignore.case = TRUE)] <- "RAIN"
-
-# listing the transformed event types
-sort(table(newStormData$EVENT), decreasing = TRUE)
-```
-
-    ## 
-    ##      HAIL      WIND     STORM     FLOOD TORNAD\nO     OTHER    WINTER      SNOW 
-    ##    289270    255362    113156     82686     60700     48894     19604     17660 
-    ##      RAIN      HEAT 
-    ##     12241      2648
+    ##             BGN_DATE REMARKS    newDate newYear EVTYPE2
+    ## 1  4/18/1950 0:00:00          4/18/1950    1950 TORNADO
+    ## 2  4/18/1950 0:00:00          4/18/1950    1950 TORNADO
+    ## 3  2/20/1951 0:00:00          2/20/1951    1951 TORNADO
+    ## 4   6/8/1951 0:00:00           6/8/1951    1951 TORNADO
+    ## 5 11/15/1951 0:00:00         11/15/1951    1951 TORNADO
+    ## 6 11/15/1951 0:00:00         11/15/1951    1951 TORNADO
 
 #### Distribution of the estimates of injured and fatalities
 
@@ -474,7 +417,7 @@ newStormData <- subset(newStormData, newStormData$numericDamage2 == FALSE)
 dim(newStormData)
 ```
 
-    ## [1] 901901     17
+    ## [1] 901901     15
 
 Let’s also remove the records with “-”, “+”, and “?”.
 
@@ -503,7 +446,7 @@ newStormData <- subset(newStormData, newStormData$numericDamage4 == FALSE)
 dim(newStormData)
 ```
 
-    ## [1] 901880     19
+    ## [1] 901880     17
 
 Let’s tally the records by multiplier again.
 
@@ -597,7 +540,7 @@ ggplot(data = averages, aes(x = newDate, y = value, group = variable)) +
   scale_color_discrete(name = "Legend:", labels = c("Crop damage", "Property damage"))
 ```
 
-![](PeerAssignment2_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](PeerAssignment2_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 Here, it becomes apparent that there are no crop-damage estimates before
 1993. This is a noteworthy limitation of the dataset.
 
@@ -697,7 +640,7 @@ ggplot(data = mergedRank2, aes(x = reorder(factor(EVTYPE2), -Num), y = Num, fill
   scale_fill_discrete(name = "Legend:", labels = c("Fatalities", "Injured"))
 ```
 
-![](PeerAssignment2_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](PeerAssignment2_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ### Q2: Which events have the greatest economic consequences?
 
@@ -742,4 +685,4 @@ ggplot(data = mergedRank4, aes(x = reorder(EVTYPE2, -Num), y = Num, fill = type)
   scale_fill_discrete(name = "Legend:", labels = c("Crop damage", "Property damage"))
 ```
 
-![](PeerAssignment2_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](PeerAssignment2_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
