@@ -519,9 +519,10 @@ ggplot(data = averages, aes(x = newDate, y = value, group = variable)) +
   scale_color_discrete(name = "Legend:", labels = c("Crop damage", "Property damage"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- --> Here, it
-becomes apparent that there are no crop-damage estimates before 1993.
-This is a noteworthy limitation of the dataset.
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+Here, it becomes apparent that there are no crop-damage estimates before
+1993. This is a noteworthy limitation of the dataset.
 
 ### Data analysis
 
@@ -654,7 +655,12 @@ property and crop damage caused by the ten most high-impact event types.
 ``` r
 mergedRank4 <- rbind(highestPropDmg, highestCropDmg)
 
-ggplot(data = mergedRank4, aes(x = reorder(EVTYPE2, -Num), y = Num, fill = type)) +
+# Ordering: https://stackoverflow.com/questions/42945149/how-to-make-ggplot-to-order-a-stacked-barchart
+library(dplyr)
+mergedRank4 <- arrange(mergedRank4, desc(Num)) 
+mergedRank4$EVTYPE2 <- factor(mergedRank4$EVTYPE2, levels = unique(mergedRank4$EVTYPE2))
+
+ggplot(data = mergedRank4, aes(x = EVTYPE2, y = Num, fill = type)) +
   geom_bar(stat = "identity") + 
   theme(axis.text.x = element_text(angle = 75, hjust = 1)) + 
   labs(title = "Stacked bar chart of estimated cost of damage by event type",
